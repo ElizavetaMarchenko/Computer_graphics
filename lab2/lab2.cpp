@@ -128,11 +128,22 @@ void Render(ID3D11DeviceContext* pDeviceContext, ID3D11RenderTargetView* pRender
     pDeviceContext->DrawIndexed(3, 0, 0);
 }
 
+LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
+    switch (message) {
+    case WM_CLOSE:
+        PostQuitMessage(0); // Завершаем цикл сообщений
+        break;
+    default:
+        return DefWindowProc(hWnd, message, wParam, lParam);
+    }
+    return 0;
+}
+
 HWND CreateWindowInstance(HINSTANCE hInstance, int nCmdShow) {
     WNDCLASSEX wcex = {};
     wcex.cbSize = sizeof(WNDCLASSEX);
     wcex.style = CS_HREDRAW | CS_VREDRAW;
-    wcex.lpfnWndProc = DefWindowProc;
+    wcex.lpfnWndProc = WndProc;
     wcex.hInstance = hInstance;
     wcex.hCursor = LoadCursor(nullptr, IDC_ARROW);
     wcex.lpszClassName = L"Lab2WindowClass";

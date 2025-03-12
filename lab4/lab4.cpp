@@ -436,7 +436,7 @@ void UpdateRotation(double deltaTime, ID3D11DeviceContext* pDeviceContext, ID3D1
     DirectX::XMVECTOR rotationAxis = DirectX::XMVectorSet(1.0f, 1.0f, 1.0f, 0.0f); // ось постоянного вращения куба
     rotationAxis = DirectX::XMVector3Normalize(rotationAxis);
     static float rotationAngle = 0.0f;
-    static const double rotationModelSpeed = 0.01f;
+    static const double rotationModelSpeed = 0.03f;
 
     rotationAngle += rotationModelSpeed * deltaTime;
     if (rotationAngle > 2 * DirectX::XM_PI) {

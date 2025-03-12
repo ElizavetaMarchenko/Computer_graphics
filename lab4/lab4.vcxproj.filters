@@ -50,11 +50,11 @@
     </Image>
   </ItemGroup>
   <ItemGroup>
-    <Library Include="..\..\..\lab4\lab4\DirectXTex\Bin\Desktop_2022_Win10\x64\Debug\DirectXTex.lib" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="..\..\..\lab4\lab4\DirectXTex\DirectXTex.inl">
       <Filter>Файлы заголовков</Filter>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="DirectXTex.lib" />
   </ItemGroup>
 </Project>

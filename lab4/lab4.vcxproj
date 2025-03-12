@@ -144,10 +144,10 @@
     <Image Include="small.ico" />
   </ItemGroup>
   <ItemGroup>
-    <Library Include="..\..\..\lab4\lab4\DirectXTex\Bin\Desktop_2022_Win10\x64\Debug\DirectXTex.lib" />
+    <None Include="..\..\..\lab4\lab4\DirectXTex\DirectXTex.inl" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\..\lab4\lab4\DirectXTex\DirectXTex.inl" />
+    <Library Include="DirectXTex.lib" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

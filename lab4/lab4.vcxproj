@@ -21,7 +21,7 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{63611391-91f8-40c0-b407-8952ee4b2f3b}</ProjectGuid>
+    <ProjectGuid>{54685c22-8ba2-4b07-8deb-068cb49215fd}</ProjectGuid>
     <RootNamespace>lab4</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
@@ -104,14 +104,10 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\Users\artem\Desktop\comp_graphics\Новая папка %282%29\Computer_graphics-lab4\Computer_graphics-lab4\lab4;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>C:\Users\artem\Desktop\comp_graphics\Новая папка %282%29\Computer_graphics-lab4\Computer_graphics-lab4\lab4;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>d3d11.lib;dxguid.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -131,7 +127,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="DirectXTex.h" />
+    <ClInclude Include="..\..\..\lab4\lab4\DirectXTex\DirectXTex.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="lab4.h" />
     <ClInclude Include="Resource.h" />
@@ -148,10 +144,10 @@
     <Image Include="small.ico" />
   </ItemGroup>
   <ItemGroup>
-    <Library Include="DirectXTex.lib" />
+    <Library Include="..\..\..\lab4\lab4\DirectXTex\Bin\Desktop_2022_Win10\x64\Debug\DirectXTex.lib" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="DirectXTex.inl" />
+    <None Include="..\..\..\lab4\lab4\DirectXTex\DirectXTex.inl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

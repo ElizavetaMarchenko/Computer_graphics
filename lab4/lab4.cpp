@@ -1,132 +1,4 @@
-﻿#include <d3d11.h>
-#include "lab4.h"
-#include <dxgi.h>
-#include <d3dcompiler.h>
-#include <cmath>
-#include <string>
-#include <vector>
-#include <chrono>
-#include <DirectXMath.h>
-#include <DirectXTex.h>
-#include <algorithm>
-
-#pragma comment(lib, "d3d11.lib")
-#pragma comment(lib, "dxgi.lib")
-#pragma comment(lib, "d3dcompiler.lib")
-
-struct TextureVertex {
-    float x, y, z; // Позиция вершины
-    float u, v;    // Текстурные координаты
-};
-
-static const TextureVertex Vertices[24] = {
-    {-0.5f, -0.5f,  0.5f, 0.0f, 1.0f}, // 0
-    { 0.5f, -0.5f,  0.5f, 1.0f, 1.0f}, // 1
-    { 0.5f, -0.5f, -0.5f, 1.0f, 0.0f}, // 2
-    {-0.5f, -0.5f, -0.5f, 0.0f, 0.0f}, // 3
-
-    { 0.5f, -0.5f, -0.5f, 0.0f, 1.0f}, // 4
-    { 0.5f, -0.5f,  0.5f, 1.0f, 1.0f}, // 5
-    { 0.5f,  0.5f,  0.5f, 1.0f, 0.0f}, // 6
-    { 0.5f,  0.5f, -0.5f, 0.0f, 0.0f}, // 7
-
-    {-0.5f, -0.5f,  0.5f, 0.0f, 1.0f}, // 8
-    { 0.5f, -0.5f,  0.5f, 1.0f, 1.0f}, // 9
-    { 0.5f,  0.5f,  0.5f, 1.0f, 0.0f}, // 10
-    {-0.5f,  0.5f,  0.5f, 0.0f, 0.0f}, // 11
-
-    {-0.5f, -0.5f, -0.5f, 1.0f, 1.0f}, // 12
-    { 0.5f, -0.5f, -0.5f, 0.0f, 1.0f}, // 13
-    { 0.5f,  0.5f, -0.5f, 0.0f, 0.0f}, // 14
-    {-0.5f,  0.5f, -0.5f, 1.0f, 0.0f}, // 15
-
-    {-0.5f,  0.5f,  0.5f, 0.0f, 1.0f}, // 16
-    { 0.5f,  0.5f,  0.5f, 1.0f, 1.0f}, // 17
-    { 0.5f,  0.5f, -0.5f, 1.0f, 0.0f}, // 18
-    {-0.5f,  0.5f, -0.5f, 0.0f, 0.0f}, // 19
-
-    {-0.5f, -0.5f, -0.5f, 0.0f, 1.0f}, // 20
-    {-0.5f, -0.5f,  0.5f, 1.0f, 1.0f}, // 21
-    {-0.5f,  0.5f,  0.5f, 1.0f, 0.0f}, // 22
-    {-0.5f,  0.5f, -0.5f, 0.0f, 0.0f}  // 23
-};
-
-struct GeomBuffer {
-    DirectX::XMMATRIX model;
-    DirectX::XMMATRIX view;
-    DirectX::XMMATRIX projection;
-};
-
-static const UINT16 Indices[36] = {
-    0, 2, 1, 0, 3, 2,
-
-    4, 6, 5, 4, 7, 6,
-
-    8, 9, 10, 8, 10, 11,
-
-    12, 14, 13, 12, 15, 14,
-
-    16, 17, 18, 16, 18, 19,
-
-    20, 21, 22, 20, 22, 23
-};
-
-struct TextureDesc
-{
-    UINT32 pitch = 0;
-    UINT32 mipmapsCount = 0;
-    DXGI_FORMAT fmt = DXGI_FORMAT_UNKNOWN;
-    UINT32 width = 0;
-    UINT32 height = 0;
-    void* pData = nullptr;
-};
-
-const char* vertexShaderCode = R"(
-cbuffer GeomBuffer : register(b0)
-{
-    float4x4 model;
-    float4x4 view;
-    float4x4 projection;
-};
-
-struct VSInput
-{
-    float3 pos : POSITION;
-    float2 uv : TEXCOORD;
-};
-
-struct VSOutput
-{
-    float4 pos : SV_Position;
-    float2 uv : TEXCOORD;
-};
-
-VSOutput vs(VSInput vertex)
-{
-    VSOutput result;
-    float4 pos = float4(vertex.pos, 1.0);
-    pos = mul(model, pos);
-    pos = mul(view, pos);
-    pos = mul(projection, pos);
-    result.pos = pos;
-    result.uv = vertex.uv;
-    return result;
-}
-)";
-
-const char* pixelShaderCode = R"(
-Texture2D colorTexture : register(t0);
-SamplerState colorSampler : register(s0);
-
-struct VSOutput {
-    float4 pos : SV_Position;
-    float2 uv : TEXCOORD;
-};
-
-float4 ps(VSOutput pixel) : SV_Target {
-    return colorTexture.Sample(colorSampler, pixel.uv);
-}
-)";
+﻿#include "lab4.h"
 
 HRESULT CreateVertexBuffer(ID3D11Device* pDevice, ID3D11Buffer** ppVertexBuffer) {
     D3D11_BUFFER_DESC desc = {};
@@ -154,6 +26,32 @@ HRESULT CreateIndexBuffer(ID3D11Device* pDevice, ID3D11Buffer** ppIndexBuffer) {
     return pDevice->CreateBuffer(&desc, &data, ppIndexBuffer);
 }
 
+HRESULT CreateSphereVertexBuffer(ID3D11Device* pDevice, ID3D11Buffer** ppVertexBuffer) {
+    D3D11_BUFFER_DESC desc = {};
+    desc.ByteWidth = sizeof(SkyboxVertices);
+    desc.Usage = D3D11_USAGE_IMMUTABLE;
+    desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+    desc.CPUAccessFlags = 0;
+
+    D3D11_SUBRESOURCE_DATA data = {};
+    data.pSysMem = SkyboxVertices;
+
+    return pDevice->CreateBuffer(&desc, &data, ppVertexBuffer);
+}
+
+HRESULT CreateSphereIndexBuffer(ID3D11Device* pDevice, ID3D11Buffer** ppIndexBuffer) {
+    D3D11_BUFFER_DESC desc = {};
+    desc.ByteWidth = sizeof(SkyboxIndices);
+    desc.Usage = D3D11_USAGE_IMMUTABLE;
+    desc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+    desc.CPUAccessFlags = 0;
+
+    D3D11_SUBRESOURCE_DATA data = {};
+    data.pSysMem = SkyboxIndices;
+
+    return pDevice->CreateBuffer(&desc, &data, ppIndexBuffer);
+}
+
 HRESULT CompileShader(const char* shaderCode, const char* entryPoint, const char* target, ID3DBlob** ppCode) {
     ID3DBlob* pErrorBlob = nullptr;
     HRESULT hr = D3DCompile(shaderCode, strlen(shaderCode), nullptr, nullptr, nullptr, entryPoint, target, D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION, 0, ppCode, &pErrorBlob);
@@ -176,18 +74,17 @@ HRESULT CreateInputLayout(ID3D11Device* pDevice, ID3D11InputLayout** ppInputLayo
 }
 
 bool LoadDDS(const std::wstring& filePath, TextureDesc& textureDesc) {
-    DirectX::ScratchImage image;
-    HRESULT hr = DirectX::LoadFromDDSFile(filePath.c_str(), DirectX::DDS_FLAGS_NONE, nullptr, image);
+    HRESULT hr = DirectX::LoadFromDDSFile(filePath.c_str(), DirectX::DDS_FLAGS_NONE, nullptr, textureDesc.image);
     if (FAILED(hr)) {
         return false;
     }
 
-    const DirectX::TexMetadata& metadata = image.GetMetadata();
+    const DirectX::TexMetadata& metadata = textureDesc.image.GetMetadata();
     textureDesc.width = static_cast<UINT32>(metadata.width);
     textureDesc.height = static_cast<UINT32>(metadata.height);
     textureDesc.fmt = metadata.format;
     textureDesc.mipmapsCount = static_cast<UINT32>(metadata.mipLevels);
-    textureDesc.pData = image.GetPixels();
+    textureDesc.pData = textureDesc.image.GetPixels(); // Указатель на данные текстуры
 
     return true;
 }
@@ -222,7 +119,7 @@ inline UINT32 GetBytesPerBlock(DXGI_FORMAT format) {
     }
 }
 
-HRESULT CreateTexture(ID3D11Device* pDevice, const TextureDesc& textureDesc, ID3D11Texture2D** ppTexture) { 
+HRESULT CreateTexture(ID3D11Device* pDevice, const TextureDesc& textureDesc, ID3D11Texture2D** ppTexture) {
     D3D11_TEXTURE2D_DESC desc = {};
     desc.Width = textureDesc.width;
     desc.Height = textureDesc.height;
@@ -257,6 +154,34 @@ HRESULT CreateTexture(ID3D11Device* pDevice, const TextureDesc& textureDesc, ID3
     return pDevice->CreateTexture2D(&desc, data.data(), ppTexture);
 }
 
+HRESULT CreateSphereTexture(ID3D11Device* pDevice, const TextureDesc* textureDesc, ID3D11Texture2D** ppCubemapTexture) {
+    D3D11_TEXTURE2D_DESC desc = {};
+    desc.Width = textureDesc[0].width;
+    desc.Height = textureDesc[0].height;
+    desc.MipLevels = 1;
+    desc.ArraySize = 6;
+    desc.Format = textureDesc[0].fmt;
+    desc.SampleDesc.Count = 1;
+    desc.SampleDesc.Quality = 0;
+    desc.Usage = D3D11_USAGE_IMMUTABLE;
+    desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+    desc.CPUAccessFlags = 0;
+    desc.MiscFlags = D3D11_RESOURCE_MISC_TEXTURECUBE;
+
+    UINT32 blockWidth = DivUp(desc.Width, 4u);
+    UINT32 blockHeight = DivUp(desc.Height, 4u);
+    UINT32 pitch = blockWidth * GetBytesPerBlock(desc.Format);
+
+    D3D11_SUBRESOURCE_DATA data[6];
+    for (UINT32 i = 0; i < 6; i++) {
+        data[i].pSysMem = textureDesc[i].pData;
+        data[i].SysMemPitch = pitch;
+        data[i].SysMemSlicePitch = 0;
+    }
+
+    return pDevice->CreateTexture2D(&desc, data, ppCubemapTexture);
+}
+
 HRESULT CreateShaderResourceView(ID3D11Device* pDevice, ID3D11Texture2D* pTexture, DXGI_FORMAT textureFmt, ID3D11ShaderResourceView** ppTextureView) {
     D3D11_SHADER_RESOURCE_VIEW_DESC desc = {};
     desc.Format = textureFmt;
@@ -267,12 +192,22 @@ HRESULT CreateShaderResourceView(ID3D11Device* pDevice, ID3D11Texture2D* pTextur
     return pDevice->CreateShaderResourceView(pTexture, &desc, ppTextureView);
 }
 
+HRESULT CreateShaderSphereResourceView(ID3D11Device* pDevice, ID3D11Texture2D* pTexture, DXGI_FORMAT textureFmt, ID3D11ShaderResourceView** ppTextureView) {
+    D3D11_SHADER_RESOURCE_VIEW_DESC desc = {};
+    desc.Format = textureFmt;
+    desc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURECUBE;
+    desc.TextureCube.MipLevels = 1;
+    desc.TextureCube.MostDetailedMip = 0;
+
+    return pDevice->CreateShaderResourceView(pTexture, &desc, ppTextureView);
+}
+
 HRESULT CreateSampler(ID3D11Device* pDevice, ID3D11SamplerState** ppSampler) {
     D3D11_SAMPLER_DESC desc = {};
     desc.Filter = D3D11_FILTER_ANISOTROPIC;
-    desc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
-    desc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
-    desc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
+    desc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+    desc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+    desc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
     desc.MinLOD = 0.0f;
     desc.MaxLOD = FLT_MAX;
     desc.MipLODBias = 0.0f;
@@ -283,13 +218,17 @@ HRESULT CreateSampler(ID3D11Device* pDevice, ID3D11SamplerState** ppSampler) {
     return pDevice->CreateSamplerState(&desc, ppSampler);
 }
 
-void Render(ID3D11DeviceContext* pDeviceContext, ID3D11RenderTargetView* pRenderTargetView, ID3D11DepthStencilView* pDepthStencilView, ID3D11Buffer* pIndexBuffer, ID3D11Buffer* pVertexBuffer, ID3D11InputLayout* pInputLayout, ID3D11VertexShader* pVertexShader, ID3D11PixelShader* pPixelShader, ID3D11Buffer* pGeomBuffer, ID3D11SamplerState* pSampler, ID3D11ShaderResourceView* pTextureView) {
+void Render(ID3D11DeviceContext* pDeviceContext, ID3D11RenderTargetView* pRenderTargetView, ID3D11DepthStencilView* pDepthStencilView,
+    ID3D11Buffer* pIndexBuffer, ID3D11Buffer* pVertexBuffer, ID3D11InputLayout* pInputLayout, ID3D11VertexShader* pVertexShader,
+    ID3D11PixelShader* pPixelShader, ID3D11Buffer* pGeomBuffer, ID3D11SamplerState* pSampler, ID3D11ShaderResourceView* pTextureView,
+    ID3D11Buffer* pSphereIndexBuffer, ID3D11Buffer* pSphereVertexBuffer, ID3D11InputLayout* pSphereInputLayout, ID3D11VertexShader* pSphereVertexShader,
+    ID3D11PixelShader* pSpherePixelShader, ID3D11Buffer* pSphereGeomBuffer, ID3D11Buffer* pSphereSceneBuffer, ID3D11ShaderResourceView* pSphereTextureView)
+{
     static const FLOAT clearColor[4] = { 0.3f, 0.3f, 0.3f, 1.0f }; // серый цвет
     pDeviceContext->ClearRenderTargetView(pRenderTargetView, clearColor);
     pDeviceContext->ClearDepthStencilView(pDepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
 
     pDeviceContext->OMSetRenderTargets(1, &pRenderTargetView, pDepthStencilView);
-
     D3D11_VIEWPORT viewport = {};
     viewport.TopLeftX = 0;
     viewport.TopLeftY = 0;
@@ -298,6 +237,21 @@ void Render(ID3D11DeviceContext* pDeviceContext, ID3D11RenderTargetView* pRender
     viewport.MinDepth = 0.0f;
     viewport.MaxDepth = 1.0f;
     pDeviceContext->RSSetViewports(1, &viewport);
+    // cubemap
+    pDeviceContext->IASetIndexBuffer(pSphereIndexBuffer, DXGI_FORMAT_R16_UINT, 0);
+    ID3D11Buffer* vertexSphereBuffers[] = { pSphereVertexBuffer };
+    UINT sp_strides[] = { sizeof(SphereVertex) };
+    UINT sp_offsets[] = { 0 };
+    pDeviceContext->IASetVertexBuffers(0, 1, vertexSphereBuffers, sp_strides, sp_offsets);
+    pDeviceContext->IASetInputLayout(pSphereInputLayout);
+    pDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+    pDeviceContext->VSSetShader(pSphereVertexShader, nullptr, 0);
+    pDeviceContext->PSSetShader(pSpherePixelShader, nullptr, 0);
+    pDeviceContext->VSSetConstantBuffers(1, 1, &pSphereGeomBuffer);
+    pDeviceContext->VSSetConstantBuffers(0, 1, &pSphereSceneBuffer);
+    pDeviceContext->PSSetSamplers(0, 1, &pSampler);
+    pDeviceContext->PSSetShaderResources(0, 1, &pSphereTextureView);
+    pDeviceContext->DrawIndexed(36, 0, 0);
 
     pDeviceContext->IASetIndexBuffer(pIndexBuffer, DXGI_FORMAT_R16_UINT, 0);
     ID3D11Buffer* vertexBuffers[] = { pVertexBuffer };
@@ -403,6 +357,19 @@ HRESULT InitDirectX(HWND hWnd, ID3D11Device** ppDevice, ID3D11DeviceContext** pp
         return hr;
     }
 
+    D3D11_DEPTH_STENCIL_DESC depthStencilDesc = {};
+    depthStencilDesc.DepthEnable = TRUE; // Включить тест глубины
+    depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO; // Разрешить запись в depth buffer
+    depthStencilDesc.DepthFunc = D3D11_COMPARISON_LESS; // Стандартная функция глубины
+
+    ID3D11DepthStencilState* pDepthStencilState = nullptr;
+    hr = (*ppDevice)->CreateDepthStencilState(&depthStencilDesc, &pDepthStencilState);
+    if (FAILED(hr)) {
+        return hr;
+    }
+    (*ppDeviceContext)->OMSetDepthStencilState(pDepthStencilState, 0);
+
+
     D3D11_DEPTH_STENCIL_VIEW_DESC depthViewDesc = {};
     depthViewDesc.Format = depthDesc.Format;
     depthViewDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
@@ -416,7 +383,7 @@ HRESULT InitDirectX(HWND hWnd, ID3D11Device** ppDevice, ID3D11DeviceContext** pp
     return hr;
 }
 
-void HandleInput(double deltaTime, double& angle_y, double& angle_xz, double rotationSpeed) {
+void HandleInput(double deltaTime, double& angle_y, double& angle_xz, double rotationSpeed, double& cameraRadius) {
     // Поворот влево (стрелка влево)
     if (GetAsyncKeyState(VK_RIGHT) & 0x8000) {
         angle_y -= rotationSpeed * deltaTime;
@@ -446,13 +413,24 @@ void HandleInput(double deltaTime, double& angle_y, double& angle_xz, double rot
     {
         angle_xz = -DirectX::XM_PI / 2 + FLT_EPSILON;
     }
+
+    // изменение расстояния от камеры
+    if (GetAsyncKeyState('W') & 0x8000 && cameraRadius > 1.0) {
+        cameraRadius -= rotationSpeed * 2.0 * deltaTime;
+    }
+    // Уменьшение расстояния (клавиша S)
+    if (GetAsyncKeyState('S') & 0x8000 && cameraRadius < 100.0) {
+        cameraRadius += rotationSpeed * 2.0 * deltaTime;
+    }
 }
 
-void UpdateRotation(double deltaTime, ID3D11DeviceContext* pDeviceContext, ID3D11Buffer* pGeomBuffer, double& angle_y, double& angle_xz) {
+void UpdateRotation(double deltaTime, ID3D11DeviceContext* pDeviceContext, ID3D11Buffer* pGeomBuffer, ID3D11Buffer* pSphereGeomBuffer, ID3D11Buffer* pSphereSceneBuffer, double& angle_y, double& angle_xz, double& cameraRadius) {
     static const double rotationViewSpeed = 1.0; // Скорость повота камеры
-    HandleInput(deltaTime, angle_y, angle_xz, rotationViewSpeed);
+    HandleInput(deltaTime, angle_y, angle_xz, rotationViewSpeed, cameraRadius);
 
     GeomBuffer geomBuffer;
+    GeomBuffer sphereGeomBuffer;
+    SceneBuffer sphereSceneBuffer;
 
     DirectX::CXMMATRIX offset = DirectX::XMMatrixTranslation(0.0f, 0.0f, 1.0f);
     DirectX::XMVECTOR rotationAxis = DirectX::XMVectorSet(1.0f, 1.0f, 1.0f, 0.0f); // ось постоянного вращения куба
@@ -468,8 +446,8 @@ void UpdateRotation(double deltaTime, ID3D11DeviceContext* pDeviceContext, ID3D1
     DirectX::XMMATRIX rotationMatrix = DirectX::XMMatrixRotationAxis(rotationAxis, rotationAngle);
 
     geomBuffer.model = rotationMatrix;
+    sphereGeomBuffer.model = DirectX::XMMatrixIdentity();
 
-    float cameraRadius = 1.0f;
     float cameraX = cameraRadius * sinf(static_cast<float>(angle_y)); // x = r * sin(angle)
     float cameraZ = cameraRadius * cosf(static_cast<float>(angle_y)); // z = r * cos(angle)
     float cameraY = cameraRadius * sinf(static_cast<float>(angle_xz));
@@ -483,17 +461,26 @@ void UpdateRotation(double deltaTime, ID3D11DeviceContext* pDeviceContext, ID3D1
     );
 
     geomBuffer.view = DirectX::XMMatrixMultiply(view, offset);
+    //sphereGeomBuffer.view = DirectX::XMMatrixMultiply(view, offset);
 
     float fov = DirectX::XM_PI / 3.0f; // угол обзора 60 градусов
     float aspectRatio = 1280.0f / 720.0f;
     float nearZ = 0.1f; // ближняя плоскость отсечения
-    float farZ = 100.0f; // дальняя плоскость отсечения
+    float farZ = 1000.0f; // дальняя плоскость отсечения
     geomBuffer.projection = DirectX::XMMatrixPerspectiveFovLH(fov, aspectRatio, nearZ, farZ);
+    //sphereGeomBuffer.projection = DirectX::XMMatrixPerspectiveFovLH(fov, aspectRatio, nearZ, farZ);
+    sphereSceneBuffer.vp = geomBuffer.view * geomBuffer.projection;
+    sphereSceneBuffer.cameraPos.x = cameraX;
+    sphereSceneBuffer.cameraPos.y = cameraY;
+    sphereSceneBuffer.cameraPos.z = cameraZ;
 
     pDeviceContext->UpdateSubresource(pGeomBuffer, 0, nullptr, &geomBuffer, 0, 0);
+    pDeviceContext->UpdateSubresource(pSphereGeomBuffer, 0, nullptr, &sphereGeomBuffer, 0, 0);
+    pDeviceContext->UpdateSubresource(pSphereSceneBuffer, 0, nullptr, &sphereSceneBuffer, 0, 0);
 }
 
-int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPWSTR lpCmdLine, _In_ int nCmdShow) {
+int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPWSTR lpCmdLine, _In_ int nCmdShow)
+{
     HWND hWnd = CreateWindowInstance(hInstance, nCmdShow);
     if (!hWnd) {
         return -1;
@@ -510,6 +497,79 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
         return -1;
     }
 
+    // небесная сфера
+    ID3D11Buffer* pSphereVertexBuffer = nullptr;
+    ID3D11Buffer* pSphereIndexBuffer = nullptr;
+    ID3D11VertexShader* pSphereVertexShader = nullptr;
+    ID3D11PixelShader* pSpherePixelShader = nullptr;
+    ID3D11InputLayout* pSphereInputLayout = nullptr;
+    ID3D11Buffer* pSphereGeomBuffer = nullptr;
+    ID3D11Buffer* pSphereSceneBuffer = nullptr;
+
+    CreateSphereVertexBuffer(pDevice, &pSphereVertexBuffer);
+    CreateSphereIndexBuffer(pDevice, &pSphereIndexBuffer);
+
+    // Загрузка текстуры сферы
+    const std::wstring TextureNames[6] = { L"space.dds", L"space.dds", L"space.dds", L"space.dds", L"space.dds", L"space.dds" };
+    TextureDesc texDescs[6];
+    for (int i = 0; i < 6; i++)
+    {
+        if (!LoadDDS(TextureNames[i].c_str(), texDescs[i]))
+        {
+            return -1;
+        }
+    }
+    ID3D11Texture2D* pSphereTexture = nullptr;
+
+    HRESULT hr = CreateSphereTexture(pDevice, texDescs, &pSphereTexture);
+    if (FAILED(hr)) {
+        return -1;
+    }
+
+    ID3D11ShaderResourceView* pSphereTextureView = nullptr;
+    hr = CreateShaderSphereResourceView(pDevice, pSphereTexture, texDescs[0].fmt, &pSphereTextureView);
+    if (FAILED(hr)) {
+        return -1;
+    }
+
+    ID3DBlob* pSphereVertexShaderBlob = nullptr;
+    ID3DBlob* pSpherePixelShaderBlob = nullptr;
+    CompileShader(vertexSphereShaderCode, "vs", "vs_5_0", &pSphereVertexShaderBlob);
+    CompileShader(pixelSphereShaderCode, "ps", "ps_5_0", &pSpherePixelShaderBlob);
+
+    pDevice->CreateVertexShader(pSphereVertexShaderBlob->GetBufferPointer(), pSphereVertexShaderBlob->GetBufferSize(), nullptr, &pSphereVertexShader);
+    pDevice->CreatePixelShader(pSpherePixelShaderBlob->GetBufferPointer(), pSpherePixelShaderBlob->GetBufferSize(), nullptr, &pSpherePixelShader);
+    CreateInputLayout(pDevice, &pSphereInputLayout, pSphereVertexShaderBlob); // надо ли???
+
+    // Создание константного буфера
+    D3D11_BUFFER_DESC Spheredesc = {};
+    Spheredesc.ByteWidth = sizeof(GeomBuffer);
+    Spheredesc.Usage = D3D11_USAGE_DEFAULT;
+    Spheredesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+    Spheredesc.CPUAccessFlags = 0;
+    Spheredesc.MiscFlags = 0;
+    Spheredesc.StructureByteStride = 0;
+
+    hr = pDevice->CreateBuffer(&Spheredesc, nullptr, &pSphereGeomBuffer);
+    if (FAILED(hr)) {
+        return -1;
+    }
+
+    // Создание константного буфера
+    D3D11_BUFFER_DESC Scenedesc = {};
+    Scenedesc.ByteWidth = sizeof(SceneBuffer);
+    Scenedesc.Usage = D3D11_USAGE_DEFAULT;
+    Scenedesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+    Scenedesc.CPUAccessFlags = 0;
+    Scenedesc.MiscFlags = 0;
+    Scenedesc.StructureByteStride = 0;
+
+    hr = pDevice->CreateBuffer(&Scenedesc, nullptr, &pSphereSceneBuffer);
+    if (FAILED(hr)) {
+        return -1;
+    }
+
+    // куб
     ID3D11Buffer* pVertexBuffer = nullptr;
     ID3D11Buffer* pIndexBuffer = nullptr;
     ID3D11VertexShader* pVertexShader = nullptr;
@@ -522,13 +582,13 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
 
     // Загрузка текстуры
     TextureDesc textureDesc;
-    const std::wstring textureName = L"ds3.dds";
+    const std::wstring textureName = L"CAT.dds";
     if (!LoadDDS(textureName, textureDesc)) {
         return -1;
     }
 
     ID3D11Texture2D* pTexture = nullptr;
-    HRESULT hr = CreateTexture(pDevice, textureDesc, &pTexture);
+    hr = CreateTexture(pDevice, textureDesc, &pTexture);
     if (FAILED(hr)) {
         return -1;
     }
@@ -553,7 +613,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
 
     pDevice->CreateVertexShader(pVertexShaderBlob->GetBufferPointer(), pVertexShaderBlob->GetBufferSize(), nullptr, &pVertexShader);
     pDevice->CreatePixelShader(pPixelShaderBlob->GetBufferPointer(), pPixelShaderBlob->GetBufferSize(), nullptr, &pPixelShader);
-
     CreateInputLayout(pDevice, &pInputLayout, pVertexShaderBlob);
 
     // Создание константного буфера
@@ -574,6 +633,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
     auto prevTime = std::chrono::high_resolution_clock::now();
     double angle_y = 0.0;
     double angle_xz = 0.0;
+    double cameraRadius = 1.0;
     while (msg.message != WM_QUIT) {
         if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
             TranslateMessage(&msg);
@@ -585,10 +645,11 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
             prevTime = currentTime;
 
             // Обновление вращения
-            UpdateRotation(elapsed.count(), pDeviceContext, pGeomBuffer, angle_y, angle_xz);
+            UpdateRotation(elapsed.count(), pDeviceContext, pGeomBuffer, pSphereGeomBuffer, pSphereSceneBuffer, angle_y, angle_xz, cameraRadius);
 
             // Отрисовка
-            Render(pDeviceContext, pRenderTargetView, pDepthStencilView, pIndexBuffer, pVertexBuffer, pInputLayout, pVertexShader, pPixelShader, pGeomBuffer, pSampler, pTextureView);
+            Render(pDeviceContext, pRenderTargetView, pDepthStencilView, pIndexBuffer, pVertexBuffer, pInputLayout, pVertexShader, pPixelShader, pGeomBuffer, pSampler, pTextureView,
+                pSphereIndexBuffer, pSphereVertexBuffer, pSphereInputLayout, pSphereVertexShader, pSpherePixelShader, pSphereGeomBuffer, pSphereSceneBuffer, pSphereTextureView);
             pSwapChain->Present(1, 0);
         }
     }
@@ -609,6 +670,15 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
     if (pTextureView) pTextureView->Release();
     if (pSampler) pSampler->Release();
     if (pTexture) pTexture->Release();
+
+    if (pSphereVertexBuffer) pSphereVertexBuffer->Release();
+    if (pSphereIndexBuffer) pSphereIndexBuffer->Release();
+    if (pSphereVertexShader) pSphereVertexShader->Release();
+    if (pSpherePixelShader) pSpherePixelShader->Release();
+    if (pSphereInputLayout) pSphereInputLayout->Release();
+    if (pSphereGeomBuffer) pSphereGeomBuffer->Release();
+    if (pSphereTextureView) pSphereTextureView->Release();
+    if (pSphereTexture) pSphereTexture->Release();
 
     return (int)msg.wParam;
 }

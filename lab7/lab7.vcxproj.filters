@@ -48,6 +48,10 @@
     <Image Include="lab7.ico">
       <Filter>Файлы ресурсов</Filter>
     </Image>
+    <Image Include="CAT.dds" />
+    <Image Include="normal_map.dds" />
+    <Image Include="space.dds" />
+    <Image Include="texture.dds" />
   </ItemGroup>
   <ItemGroup>
     <None Include="DirectXTex.inl">

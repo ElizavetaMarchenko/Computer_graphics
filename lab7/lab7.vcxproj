@@ -109,6 +109,9 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
+    <PostBuildEvent>
+      <Command>xcopy /Y "$(ProjectDir)*.dds" "$(OutDir)"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -140,8 +143,12 @@
     <ResourceCompile Include="lab7.rc" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="CAT.dds" />
     <Image Include="lab7.ico" />
+    <Image Include="normal_map.dds" />
     <Image Include="small.ico" />
+    <Image Include="space.dds" />
+    <Image Include="texture.dds" />
   </ItemGroup>
   <ItemGroup>
     <None Include="DirectXTex.inl" />

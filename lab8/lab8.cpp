@@ -1801,41 +1801,91 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
         }
     }
 
-    // Освобождение ресурсов
-    if (pVertexBuffer) pVertexBuffer->Release();
-    if (pIndexBuffer) pIndexBuffer->Release();
-    if (pVertexShader) pVertexShader->Release();
-    if (pPixelShader) pPixelShader->Release();
-    if (pInputLayout) pInputLayout->Release();
-    if (pSwapChain) pSwapChain->Release();
-    if (pDeviceContext) pDeviceContext->Release();
-    if (pDevice) pDevice->Release();
-    if (pGeomBuffer) pGeomBuffer->Release();
-    if (pDepthStencilTexture) pDepthStencilTexture->Release();
-    if (pTextureView) pTextureView->Release();
-    if (pSampler) pSampler->Release();
-    if (pTexture) pTexture->Release();
+    if (pDeviceContext)
+    {
+        pDeviceContext->ClearState();
+        pDeviceContext->Flush();
+    }
 
-    if (pSphereVertexBuffer) pSphereVertexBuffer->Release();
-    if (pSphereIndexBuffer) pSphereIndexBuffer->Release();
-    if (pSphereVertexShader) pSphereVertexShader->Release();
-    if (pSpherePixelShader) pSpherePixelShader->Release();
-    if (pSphereInputLayout) pSphereInputLayout->Release();
-    if (pSphereGeomBuffer) pSphereGeomBuffer->Release();
-    if (pSphereTextureView) pSphereTextureView->Release();
-    if (pSphereTexture) pSphereTexture->Release();
+    ReleasePostProcessResources();
 
-    if (pSquareVertexBuffer) pSquareVertexBuffer->Release();
-    if (pSquareIndexBuffer) pSquareIndexBuffer->Release();
-    if (pSquareInputLayout) pSquareInputLayout->Release();
-    if (pSquareVertexShader) pSquareVertexShader->Release();
-    if (pSquarePixelShader) pSquarePixelShader->Release();
-    if (pSquareGeomBuffer) pSquareGeomBuffer->Release();
-    if (pColorBuffer) pColorBuffer->Release();
-    if (pNoCullRasterizerState) pNoCullRasterizerState->Release();
-    if (pTransBlendState) pTransBlendState->Release();
-    if (pNoWriteDepthStencilState) pNoWriteDepthStencilState->Release();
-    if (pGeomBufferInst) pGeomBufferInst->Release();
+    if (pRenderTargetView) { pRenderTargetView->Release(); pRenderTargetView = nullptr; }
+    if (pDepthStencilView) { pDepthStencilView->Release(); pDepthStencilView = nullptr; }
+    if (pDepthBuffer) { pDepthBuffer->Release(); pDepthBuffer = nullptr; }
+    if (pDepthState) { pDepthState->Release(); pDepthState = nullptr; }
+
+    if (pTextureView) { pTextureView->Release(); pTextureView = nullptr; }
+    if (pTextureNormalView) { pTextureNormalView->Release(); pTextureNormalView = nullptr; }
+    if (pSphereTextureView) { pSphereTextureView->Release(); pSphereTextureView = nullptr; }
+    if (pTexture) { pTexture->Release(); pTexture = nullptr; }
+    if (pNormalTexture) { pNormalTexture->Release(); pNormalTexture = nullptr; }
+    if (pSphereTexture) { pSphereTexture->Release(); pSphereTexture = nullptr; }
+    if (pSampler) { pSampler->Release(); pSampler = nullptr; }
+
+    if (pVertexBuffer) { pVertexBuffer->Release(); pVertexBuffer = nullptr; }
+    if (pIndexBuffer) { pIndexBuffer->Release(); pIndexBuffer = nullptr; }
+    if (pSphereVertexBuffer) { pSphereVertexBuffer->Release(); pSphereVertexBuffer = nullptr; }
+    if (pSphereIndexBuffer) { pSphereIndexBuffer->Release(); pSphereIndexBuffer = nullptr; }
+    if (pSquareVertexBuffer) { pSquareVertexBuffer->Release(); pSquareVertexBuffer = nullptr; }
+    if (pSquareIndexBuffer) { pSquareIndexBuffer->Release(); pSquareIndexBuffer = nullptr; }
+    if (pInstanceBuffer) { pInstanceBuffer->Release(); pInstanceBuffer = nullptr; }
+
+    if (pVertexShader) { pVertexShader->Release(); pVertexShader = nullptr; }
+    if (pPixelShader) { pPixelShader->Release(); pPixelShader = nullptr; }
+    if (pLightPixelShader) { pLightPixelShader->Release(); pLightPixelShader = nullptr; }
+    if (pSphereVertexShader) { pSphereVertexShader->Release(); pSphereVertexShader = nullptr; }
+    if (pSpherePixelShader) { pSpherePixelShader->Release(); pSpherePixelShader = nullptr; }
+    if (pSquareVertexShader) { pSquareVertexShader->Release(); pSquareVertexShader = nullptr; }
+    if (pSquarePixelShader) { pSquarePixelShader->Release(); pSquarePixelShader = nullptr; }
+    if (pInputLayout) { pInputLayout->Release(); pInputLayout = nullptr; }
+    if (pSphereInputLayout) { pSphereInputLayout->Release(); pSphereInputLayout = nullptr; }
+    if (pSquareInputLayout) { pSquareInputLayout->Release(); pSquareInputLayout = nullptr; }
+
+    if (pGeomBuffer) { pGeomBuffer->Release(); pGeomBuffer = nullptr; }
+    if (pGeomBuffer2) { pGeomBuffer2->Release(); pGeomBuffer2 = nullptr; }
+    if (pLightGeomBuffer) { pLightGeomBuffer->Release(); pLightGeomBuffer = nullptr; }
+    if (pSceneBuffer) { pSceneBuffer->Release(); pSceneBuffer = nullptr; }
+    if (pMaterialBuffer) { pMaterialBuffer->Release(); pMaterialBuffer = nullptr; }
+    if (pGeomBufferInst) { pGeomBufferInst->Release(); pGeomBufferInst = nullptr; }
+    if (pVisibleInstancesBuffer) { pVisibleInstancesBuffer->Release(); pVisibleInstancesBuffer = nullptr; }
+    if (pSphereGeomBuffer) { pSphereGeomBuffer->Release(); pSphereGeomBuffer = nullptr; }
+    if (pSphereSceneBuffer) { pSphereSceneBuffer->Release(); pSphereSceneBuffer = nullptr; }
+    if (pSquareGeomBuffer) { pSquareGeomBuffer->Release(); pSquareGeomBuffer = nullptr; }
+    if (pColorBuffer) { pColorBuffer->Release(); pColorBuffer = nullptr; }
+
+    if (pNoCullRasterizerState) { pNoCullRasterizerState->Release(); pNoCullRasterizerState = nullptr; }
+    if (pTransBlendState) { pTransBlendState->Release(); pTransBlendState = nullptr; }
+    if (pNoWriteDepthStencilState) { pNoWriteDepthStencilState->Release(); pNoWriteDepthStencilState = nullptr; }
+
+    if (m_pFrustumCullingCS) { m_pFrustumCullingCS->Release(); m_pFrustumCullingCS = nullptr; }
+    if (m_pVisibleObjectsBuffer) { m_pVisibleObjectsBuffer->Release(); m_pVisibleObjectsBuffer = nullptr; }
+    if (m_pVisibleObjectsUAV) { m_pVisibleObjectsUAV->Release(); m_pVisibleObjectsUAV = nullptr; }
+    if (pVisibleObjectsSRV) { pVisibleObjectsSRV->Release(); pVisibleObjectsSRV = nullptr; }
+    if (m_pFrustumBuffer) { m_pFrustumBuffer->Release(); m_pFrustumBuffer = nullptr; }
+    if (m_pAABBBuffer) { m_pAABBBuffer->Release(); m_pAABBBuffer = nullptr; }
+    if (m_pIndirectArgs) { m_pIndirectArgs->Release(); m_pIndirectArgs = nullptr; }
+    if (pIndirectArgsSrc) { pIndirectArgsSrc->Release(); pIndirectArgsSrc = nullptr; }
+    if (pIndirectArgsUAV) { pIndirectArgsUAV->Release(); pIndirectArgsUAV = nullptr; }
+    if (pAABBBuffer) { pAABBBuffer->Release(); pAABBBuffer = nullptr; }
+    if (pFrustumBuffer) { pFrustumBuffer->Release(); pFrustumBuffer = nullptr; }
+
+    if (pVertexShaderBlob) { pVertexShaderBlob->Release(); pVertexShaderBlob = nullptr; }
+    if (pPixelShaderBlob) { pPixelShaderBlob->Release(); pPixelShaderBlob = nullptr; }
+    if (pLightPixelShaderBlob) { pLightPixelShaderBlob->Release(); pLightPixelShaderBlob = nullptr; }
+    if (pSquareVertexShaderBlob) { pSquareVertexShaderBlob->Release(); pSquareVertexShaderBlob = nullptr; }
+    if (pSquarePixelShaderBlob) { pSquarePixelShaderBlob->Release(); pSquarePixelShaderBlob = nullptr; }
+    if (pSphereVertexShaderBlob) { pSphereVertexShaderBlob->Release(); pSphereVertexShaderBlob = nullptr; }
+    if (pSpherePixelShaderBlob) { pSpherePixelShaderBlob->Release(); pSpherePixelShaderBlob = nullptr; }
+
+    if (pSwapChain)
+    {
+        pSwapChain->SetFullscreenState(FALSE, nullptr);
+        pSwapChain->Release();
+        pSwapChain = nullptr;
+    }
+
+    if (pDeviceContext) { pDeviceContext->Release(); pDeviceContext = nullptr; }
+    if (pDevice) { pDevice->Release(); pDevice = nullptr; }
 
     ImGui_ImplDX11_Shutdown();
     ImGui_ImplWin32_Shutdown();
